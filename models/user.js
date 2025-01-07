@@ -3,7 +3,6 @@
 /** User of the site. */
 
 class User {
-  ////
   /** register new user -- returns
    *    {username, password, first_name, last_name, phone}
    */
