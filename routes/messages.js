@@ -1,3 +1,6 @@
+const express = require("express");
+const router = express.Router();
+
 /** GET /:id - get detail of message.
  *
  * => {message: {id,
@@ -11,6 +14,7 @@
  *
  **/
 
+// const { router } = require("../app");
 
 /** POST / - post message.
  *
@@ -18,7 +22,6 @@
  *   {message: {id, from_username, to_username, body, sent_at}}
  *
  **/
-
 
 /** POST/:id/read - mark message as read:
  *
@@ -28,3 +31,4 @@
  *
  **/
 
+module.exports = router;
