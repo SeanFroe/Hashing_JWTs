@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 
 const createTokenForUser = require("../helper/createToken");
+const ExpressError = require("../expressError");
 
 /** POST /login - login: {username, password} => {token}
  *
@@ -12,6 +13,19 @@ const createTokenForUser = require("../helper/createToken");
 
 router.post("/login", async (req, res, next) => {
   try {
+    const { username, password } = req.body;
+    const user = await User.authenticate(username, password);
+
+    if (!user) {
+      throw new ExpressError("Invalid username/password", 400); // Ensure 400 for invalid login
+    }
+
+    //Update login timestamp
+    await User.updateLoginTimestamp(user.username);
+
+    const token = createTokenForUser(user.username);
+
+    return res.json({ token });
   } catch (e) {
     next(e);
   }

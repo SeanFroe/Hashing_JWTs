@@ -35,7 +35,13 @@ class User {
   static async authenticate(username, password) {
     const result = await db.query(
       `
-      SELECT password
+      SELECT password,
+      username,
+      first_name,
+      last_name,
+      phone,
+      join_at,
+      last_login_at
       FROM users
       WHERE username = $1`,
       [username]
@@ -44,11 +50,21 @@ class User {
     //check if user exsits
     const user = result.rows[0];
     if (!user) {
-      throw new ExpressError("User does not Exist", 404);
+      throw new ExpressError("Invalid username/password", 400);
     }
 
+    console.log("Stored password hash:", user.password);
+    console.log("Password to compare:", password);
     // Compare hashed password with input password
-    return user && (await bcrypt.compare(password, user.password));
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return false;
+    }
+    if (isValid) {
+      delete user.password; // Remove pasword from the user object for security.
+      return user;
+    }
+    return null; //Invalid password
   }
 
   /** Update last_login_at for user */

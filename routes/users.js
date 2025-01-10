@@ -26,6 +26,19 @@ router.get("/", ensureCorrectUser, ensureLoggedIn, async (req, res, next) => {
  *
  **/
 
+router.get(
+  "/:username",
+  ensureCorrectUser,
+  ensureLoggedIn,
+  async (req, res, next) => {
+    try {
+      const user = await User.get();
+      return res.json({ user });
+    } catch (e) {
+      return next(e);
+    }
+  }
+);
 /** GET /:username/to - get messages to user
  *
  * => {messages: [{id,
