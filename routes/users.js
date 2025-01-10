@@ -26,19 +26,14 @@ router.get("/", ensureCorrectUser, ensureLoggedIn, async (req, res, next) => {
  *
  **/
 
-router.get(
-  "/:username",
-  ensureCorrectUser,
-  ensureLoggedIn,
-  async (req, res, next) => {
-    try {
-      const user = await User.get();
-      return res.json({ user });
-    } catch (e) {
-      return next(e);
-    }
+router.get("/:username", ensureLoggedIn, async (req, res, next) => {
+  try {
+    const user = await User.get(req.params.username);
+    return res.json({ user });
+  } catch (e) {
+    return next(e);
   }
-);
+});
 /** GET /:username/to - get messages to user
  *
  * => {messages: [{id,
@@ -48,6 +43,14 @@ router.get(
  *                 from_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
+router.get("/:username/to", ensureCorrectUser, async function (req, res, next) {
+  try {
+    const messages = await User.messagesTo(req.params.username);
+    return res.json({ messages });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 /** GET /:username/from - get messages from user
  *
@@ -58,5 +61,18 @@ router.get(
  *                 to_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
+
+router.get(
+  "/:username/from",
+  ensureCorrectUser,
+  async function (req, res, next) {
+    try {
+      const messages = await User.messagesFrom(req.params.username);
+      return res.json({ messages });
+    } catch (err) {
+      return next(err);
+    }
+  }
+);
 
 module.exports = router;

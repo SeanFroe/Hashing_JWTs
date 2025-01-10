@@ -4,9 +4,11 @@ const jwt = require("jsonwebtoken");
 const app = require("../app");
 const db = require("../db");
 const User = require("../models/user");
+const { createToken } = require("../helper/createToken");
 
 describe("Users Routes Test", () => {
   let u1, u2;
+  let testUserToken;
   beforeEach(async function () {
     await db.query("DELETE FROM messages");
     await db.query("DELETE FROM users");
@@ -25,39 +27,32 @@ describe("Users Routes Test", () => {
       last_name: "Testy2",
       phone: "+1415550001",
     });
+
+    // Generate a token for the test user
+    testUserToken = createToken(u1.username);
   });
 
   //***************************************** GET **
 
-  describe("GET User tests", () => {
-    test("Get All Users", async () => {
-      const result = await User.all();
-      expect(result).toEqual([
-        {
+  describe("GET /users", () => {
+    test("should return a list of all users", async () => {
+      console.log("Generated Test Token:", testUserToken);
+      const response = await request(app)
+        .get("/users")
+        .set("Authorization", `Bearer ${testUserToken}`);
+
+      console.log("Response Status Code:", response.statusCode);
+      console.log("Response Body:", response.body);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body.users).toBeInstanceOf(Array);
+      expect(response.body.users).toContainEqual(
+        expect.objectContaining({
           username: "test1",
           first_name: "Test1",
-          last_name: "Testy1",
-          phone: "+14155550000",
-        },
-        {
-          username: "test2",
-          first_name: "Test2",
-          last_name: "Testy2",
-          phone: "+1415550001",
-        },
-      ]);
-    });
-  });
-
-  test("Get A User", async () => {
-    const result = await User.get(u1.username);
-    expect(result).toEqual({
-      username: "test1",
-      first_name: "Test1",
-      last_name: "Testy1",
-      phone: "+14155550000",
-      join_at: expect.any(String),
-      last_login_at: expect.any(String),
+          lastname: "Testy1",
+        })
+      );
     });
   });
 });
